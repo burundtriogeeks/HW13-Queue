@@ -14,7 +14,7 @@ _QUEUE_TYPE_REDIS_RDB_AOF - use Redis with turned on save option and turned on a
 
 _QUEUE_TYPE_REDIS_NO_PERSISTENCE - - use Redis with turned off save option and turned off appendonly
 
-#Testing
+# Testing
 
 Run docker-compose with specified count of consumers and producers
 
