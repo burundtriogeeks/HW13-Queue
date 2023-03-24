@@ -1,0 +1,37 @@
+version: "3.5"
+
+services:
+
+  beanstalkd:
+    image: schickling/beanstalkd
+    platform: linux/x86_64
+    restart: always
+    ports:
+      - '127.0.0.1:11300:11300'
+    volumes:
+      - beanstalkd_binlog:/my-binlog
+    command: '-b /my-binlog'
+
+
+  php-producers:
+    image: php:8.1-fpm
+    depends_on:
+      - beanstalkd
+    volumes:
+      - './app:/usr/src/myapp'
+    working_dir: /usr/src/myapp
+    entrypoint: php send.php
+
+  php-consumer:
+    image: php:8.1-fpm
+    depends_on:
+      - beanstalkd
+    volumes:
+      - './app:/usr/src/myapp'
+    working_dir: /usr/src/myapp
+    entrypoint: php worker.php
+
+
+
+volumes:
+  beanstalkd_binlog: {}
