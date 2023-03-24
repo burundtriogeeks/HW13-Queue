@@ -1,0 +1,13 @@
+{
+    "name": "root/app",
+    "require": {
+        "andrewbreksa/rsmq": "^2.0",
+        "davidpersson/beanstalk": "^2.0"
+
+    },
+    "autoload": {
+        "psr-4": {
+            "Root\\App\\": "src/"
+        }
+    }
+}
