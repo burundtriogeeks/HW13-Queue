@@ -2,20 +2,66 @@
 
     require __DIR__ . '/vendor/autoload.php';
 
-    use Beanstalk\Client;
+    require __DIR__ . '/config.php';
 
-    $beanstalk = new Client([
-        'host' => 'host.docker.internal'
-    ]);
+    if (_QUEUE_TYPE == _QUEUE_TYPE_BEANSTALK) {
 
-    $beanstalk->connect();
-    $beanstalk->watch('myTube');
+        $beanstalk = new Beanstalk\Client([
+            'host' => 'host.docker.internal'
+        ]);
 
-    while (true) {
-        $job = $beanstalk->reserve();
+        $beanstalk->connect();
+        $beanstalk->watch('myTube');
 
-        $beanstalk->delete($job['id']);
-        echo "Job done id ".$job['id']."\n";
+        while (true) {
+            $job = $beanstalk->reserve();
 
-        sleep(1);
+            $beanstalk->delete($job['id']);
+            echo "Job done id " . $job['id'] . "\n";
+
+            sleep(1);
+        }
+    }
+
+
+    if (_QUEUE_TYPE == _QUEUE_TYPE_REDIS_RDB
+        || _QUEUE_TYPE == _QUEUE_TYPE_REDIS_AOF
+        || _QUEUE_TYPE == _QUEUE_TYPE_REDIS_RDB_AOF
+        || _QUEUE_TYPE == _QUEUE_TYPE_REDIS_NO_PERSISTENCE) {
+
+        $ports = [
+            1 => 6379,
+            2 => 6380,
+            3 => 6381,
+            4 => 6382
+        ];
+
+
+        $predis = new Predis\Client(
+            [
+                'host' => 'host.docker.internal',
+                'port' =>$ports[_QUEUE_TYPE]
+            ]
+        );
+        $rsmq = new AndrewBreksa\RSMQ\RSMQClient($predis);
+
+
+        try {
+            $rsmq->createQueue('myTube');
+        } catch (Exception $e) {
+
+        }
+
+        while (true) {
+
+            $message = $rsmq->popMessage('myTube');
+            if (isset($message)) {
+                echo "Message pop ID: ".$message->getId()."\n";
+            } else {
+                echo "No messages in queue\n";
+            }
+            sleep(1);
+        }
+
+
     }

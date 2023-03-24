@@ -12,11 +12,51 @@ services:
       - beanstalkd_binlog:/my-binlog
     command: '-b /my-binlog'
 
+  redis_rdb:
+    image: bitnami/redis:latest
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - './etc/redis_rds/redis.conf:/opt/bitnami/redis/etc/redis.conf'
+    ports:
+      - '127.0.0.1:6379:6379'
+
+  redis_aof:
+    image: bitnami/redis:latest
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - './etc/redis_aof/redis.conf:/opt/bitnami/redis/etc/redis.conf'
+    ports:
+      - '127.0.0.1:6380:6379'
+
+  redis_rds_aof:
+    image: bitnami/redis:latest
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - './etc/redis_rds_aof/redis.conf:/opt/bitnami/redis/etc/redis.conf'
+    ports:
+      - '127.0.0.1:6381:6379'
+
+  redis_no_persistence:
+    image: bitnami/redis:latest
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - './etc/redis_no_persistence/redis.conf:/opt/bitnami/redis/etc/redis.conf'
+    ports:
+      - '127.0.0.1:6382:6379'
+
 
   php-producers:
     image: php:8.1-fpm
     depends_on:
       - beanstalkd
+      - redis_rdb
+      - redis_aof
+      - redis_no_persistence
+      - redis_rds_aof
     volumes:
       - './app:/usr/src/myapp'
     working_dir: /usr/src/myapp
@@ -26,6 +66,10 @@ services:
     image: php:8.1-fpm
     depends_on:
       - beanstalkd
+      - redis_rdb
+      - redis_aof
+      - redis_no_persistence
+      - redis_rds_aof
     volumes:
       - './app:/usr/src/myapp'
     working_dir: /usr/src/myapp
