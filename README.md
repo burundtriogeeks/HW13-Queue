@@ -22,6 +22,6 @@ Run docker-compose with specified count of consumers and producers
 docker-compose up --scale php-consumer=5 --scale php-producers=5
 ```
 
-Example resulr
+Example result
 
 ![result](https://i.imgur.com/ucvZp1o.png)
